@@ -54,7 +54,7 @@ const Application = () => {
            fetchUserApplications()
        }
 
-   },[ user])
+   },[user])
 
   return (
     <>
