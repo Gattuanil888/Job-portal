@@ -1,4 +1,4 @@
-import React, { useState, useContext, use, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { AppContext } from '../pages/context/AppContext';

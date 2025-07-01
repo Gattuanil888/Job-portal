@@ -6,7 +6,7 @@ import Application from './pages/Application';
 import Recruiterlogin from './components/RecruiterLogin';
 import { AppContext } from './pages/context/AppContext';
 import Dashboard from './pages/Dashboard';
-import AddJob from './pages/Addjob';
+import AddJob from './pages/AddJob';
 import Managejobs from './pages/Managejobs';
 import Viewapplications from './pages/Viewapplications';
 import 'quill/dist/quill.snow.css';
