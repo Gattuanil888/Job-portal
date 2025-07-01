@@ -1,33 +1,42 @@
-import './config/instrument.js'; // ✅ Corrected path
+import './config/instrument.js';
 import express from 'express';
 import cors from 'cors';
-import 'dotenv/config';
+import dotenv from 'dotenv'; // ✅ correct import
 import connectDB from './config/db.js';
 import * as Sentry from "@sentry/node";
 import { clerkWebhooks } from './controllers/webhooks.js';
+import userRoutes from './routes/userRoutes.js';
+import companyRoutes from './routes/companyRoute.js';
+import connectCloudinary from './config/cloudinary.js';
+import jobRoutes from './routes/jobRoutes.js';
+import { clerkMiddleware } from '@clerk/express';
 
-// Initialize express
+dotenv.config(); // ✅ correct usage
+
 const app = express();
 
-// Connect to database
-await connectDB();
+async function startServer() {
+  await connectDB();
+  await connectCloudinary();
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
+  app.use(cors());
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use('/webhooks',clerkMiddleware());
 
-// Routes
-app.get('/', (req, res) => res.send("API Working"));
-app.get("/debug-sentry", function mainHandler(req, res) {
-  throw new Error("My first Sentry error!");
-});
-app.post('/webhooks', clerkWebhooks);
+  app.get('/', (req, res) => res.send("API Working"));
+  app.post('/webhooks', clerkWebhooks);
+  app.use('/api/users', userRoutes);
+  app.use('/api/company', companyRoutes);
+  app.use('/upload', express.static('upload'));
+  app.use('/api/jobs', jobRoutes);
 
-// Setup error handler
-Sentry.setupExpressErrorHandler(app);
+  Sentry.setupExpressErrorHandler(app);
 
-// Port
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`✅ Server is running on http://localhost:${PORT}`);
+  });
+}
+
+startServer(); // 🔁 start server

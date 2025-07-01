@@ -1,6 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import axios from 'axios';
+import { AppContext } from '../pages/context/AppContext';
+import { toast } from 'react-toastify';
 
 const AddJob = () => {
+  const { backendUrl, companyToken } = useContext(AppContext);
+
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -15,10 +20,38 @@ const AddJob = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(form);
-    // Add submit logic here (API or context)
+
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/company/post-job`,
+        form,
+        {
+          headers: {
+            token: companyToken,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (data.success) {
+        toast.success(data.message || 'Job posted successfully');
+        setForm({
+          title: '',
+          description: '',
+          category: 'Programming',
+          location: 'Bangalore',
+          level: 'Senior Level',
+          salary: 0,
+        });
+      } else {
+        toast.error(data.message || 'Failed to post job');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Something went wrong');
+    }
   };
 
   return (

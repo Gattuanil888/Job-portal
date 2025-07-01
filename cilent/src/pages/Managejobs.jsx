@@ -1,10 +1,60 @@
-import React from 'react';
-import { manageJobsData } from '../assets/assets';
+import React, { useContext, useEffect, useState } from 'react';
+import axios from 'axios';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
+import { AppContext } from './context/AppContext';
+import { toast } from 'react-toastify';
 
 const Managejobs = () => {
-  const navigate = useNavigate(); // Initialize navigate here
+  const navigate = useNavigate();
+  const [jobs, setJobs] = useState([]);
+
+  const { backendUrl, companyToken } = useContext(AppContext);
+
+  const fetchCompanyJobs = async () => {
+    try {
+      const { data } = await axios.get(`${backendUrl}/api/company/list-jobs`, {
+        headers: { token: companyToken },
+      });
+
+      if (data.success) {
+        setJobs(data.jobsData.reverse());
+        console.log(data.jobsData);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to fetch jobs');
+    }
+  };
+
+  // ✅ Function to toggle visibility
+  const changeJobVisibility = async (id) => {
+    try {
+      const { data } = await axios.post(
+        `${backendUrl}/api/company/change-visibility`,
+        { id },
+        {
+          headers: { token: companyToken },
+        }
+      );
+
+      if (data.success) {
+        toast.success('Visibility updated');
+        fetchCompanyJobs(); // Refresh jobs
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (companyToken) {
+      fetchCompanyJobs();
+    }
+  }, [companyToken]);
 
   return (
     <div className="container p-4 max-w-5xl mx-auto">
@@ -20,15 +70,19 @@ const Managejobs = () => {
           </tr>
         </thead>
         <tbody>
-          {manageJobsData.map((job, index) => (
+          {jobs.map((job, index) => (
             <tr key={index} className="border-t border-gray-200 text-sm">
               <td className="p-3">{index + 1}</td>
               <td className="p-3">{job.title}</td>
               <td className="p-3">{moment(job.date).format('DD MMM, YYYY')}</td>
               <td className="p-3">{job.location}</td>
-              <td className="p-3">{job.applicants}</td>
+              <td className="p-3">{job.applicants?.length || 0}</td>
               <td className="p-3">
-                <input type="checkbox" checked={job.visible} readOnly />
+                <input
+                  type="checkbox"
+                  checked={job.visible}
+                  onChange={() => changeJobVisibility(job._id)}
+                />
               </td>
             </tr>
           ))}

@@ -1,9 +1,25 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { assets } from '../assets/assets';
+import { AppContext } from './context/AppContext';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { companyData, setCompanyData, setCompanyToken } = useContext(AppContext);
+
+  const logout = () => {
+    setCompanyToken(null);
+    localStorage.removeItem('companyToken');
+    setCompanyData(null);
+    navigate('/');
+  };
+
+  // ✅ FIXED: Only redirect to /dashboard/manage-jobs if current route is exactly /dashboard
+  useEffect(() => {
+    if (companyData && window.location.pathname === '/dashboard') {
+      navigate('/dashboard/manage-jobs');
+    }
+  }, [companyData, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -16,13 +32,18 @@ const Dashboard = () => {
             src={assets.logo}
             alt="Logo"
           />
-          <p className="text-gray-700 font-medium">Welcome, Prasad</p>
-          <div className="relative flex items-center gap-2">
-            <img src={assets.company_icon} alt="Company" className="w-10 h-10 rounded-full" />
-            <ul className="text-sm text-gray-600">
-              <li className="cursor-pointer hover:text-red-500">Logout</li>
-            </ul>
-          </div>
+
+          {companyData && (
+            <div className="flex items-center gap-4">
+              <p className="text-gray-700 font-medium">Welcome, {companyData.name}</p>
+              <div className="relative flex items-center gap-2">
+                <img src={companyData.image} alt="Company" className="w-10 h-10 rounded-full" />
+                <ul className="text-sm text-gray-600">
+                  <li onClick={logout} className="cursor-pointer hover:text-red-500">Logout</li>
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -34,31 +55,37 @@ const Dashboard = () => {
             <NavLink
               to="/dashboard/add-job"
               className={({ isActive }) =>
-                `flex items-center p-3 gap-2 hover:bg-gray-100 ${isActive ? 'bg-blue-100 border-l-4 border-blue-500' : ''}`
+                `flex items-center p-3 gap-2 hover:bg-gray-100 ${
+                  isActive ? 'bg-blue-100 border-l-4 border-blue-500' : ''
+                }`
               }
             >
-              <img className ='min-w-4'src={assets.add_icon} alt="" />
-              <p className=' max-sm-hidden'>Add Job</p>
+              <img className="min-w-4" src={assets.add_icon} alt="" />
+              <p className="max-sm-hidden">Add Job</p>
             </NavLink>
 
             <NavLink
               to="/dashboard/manage-jobs"
               className={({ isActive }) =>
-                `flex items-center p-3 gap-2 hover:bg-gray-100 ${isActive ? 'bg-blue-100 border-l-4 border-blue-500' : ''}`
+                `flex items-center p-3 gap-2 hover:bg-gray-100 ${
+                  isActive ? 'bg-blue-100 border-l-4 border-blue-500' : ''
+                }`
               }
             >
-              <img className ='min-w-4'src={assets.home_icon} alt="" />
-              <p className=' max-sm-hidden'>Manage Jobs</p>
+              <img className="min-w-4" src={assets.home_icon} alt="" />
+              <p className="max-sm-hidden">Manage Jobs</p>
             </NavLink>
 
             <NavLink
               to="/dashboard/view-applications"
               className={({ isActive }) =>
-                `flex items-center p-3 gap-2 hover:bg-gray-100 ${isActive ? 'bg-blue-100 border-l-4 border-blue-500' : ''}`
+                `flex items-center p-3 gap-2 hover:bg-gray-100 ${
+                  isActive ? 'bg-blue-100 border-l-4 border-blue-500' : ''
+                }`
               }
             >
-              <img className ='min-w-4' src={assets.person_tick_icon} alt="" />
-              <p className=' max-sm-hidden'>View Applications</p>
+              <img className="min-w-4" src={assets.person_tick_icon} alt="" />
+              <p className="max-sm-hidden">View Applications</p>
             </NavLink>
           </ul>
         </div>
