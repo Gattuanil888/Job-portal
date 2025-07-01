@@ -14,7 +14,7 @@ import {
 import { protectCompany } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.post('/register', upload.single('image'), registerCompany);
 router.post('/login', upload.none(), loginCompany);
